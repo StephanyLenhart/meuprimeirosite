@@ -416,7 +416,7 @@
             </div>
         </div>
 
-        <!-- COLUNA DIREITA: CHAT COM IA -->
+        <!-- COLUNA DIREITA: CHAT COM IA (AGORA COM DIÁLOGO DINÂMICO) -->
         <div class="chat-panel">
             <div class="chat-messages" id="chatMessages">
                 <!-- mensagem de boas-vindas da IA -->
@@ -428,20 +428,6 @@
                     </div>
                 </div>
                 <div class="timestamp" style="margin-left: 70px;">agora</div>
-
-                <!-- pequeno exemplo de interação (pode remover) -->
-                <div class="message outgoing">
-                    <div class="avatar">🙋</div>
-                    <div class="bubble">
-                        Quero entender melhor meus valores.
-                    </div>
-                </div>
-                <div class="message incoming">
-                    <div class="avatar">🧘</div>
-                    <div class="bubble">
-                        Ótimo! Valores são a bússola do autoconceito. Pense: quando você se sente realizado, o que está presente? Honestidade, liberdade, conexão?
-                    </div>
-                </div>
             </div>
 
             <!-- área de digitação + botão -->
@@ -453,13 +439,19 @@
     </div>
 </div>
 
-<!-- funcionalidade simples de chat + perguntas (JS embutido) -->
+<!-- FUNCIONALIDADE COMPLETAMENTE REFEITA: DIÁLOGO DINÂMICO E VARIADO -->
 <script>
     (function() {
         const chatMessages = document.getElementById('chatMessages');
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
         const questionCards = document.querySelectorAll('.question-card');
+
+        // Histórico da conversa para dar contexto às respostas
+        let conversationHistory = [];
+        
+        // Temas identificados na conversa para respostas mais coerentes
+        let currentTheme = 'inicial';
 
         // Função para adicionar mensagem no chat
         function addMessage(text, sender = 'user') {
@@ -477,41 +469,174 @@
             messageDiv.appendChild(avatar);
             messageDiv.appendChild(bubble);
 
-            // timestamp simples
             const time = document.createElement('div');
             time.classList.add('timestamp');
             time.textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
             chatMessages.appendChild(messageDiv);
             chatMessages.appendChild(time);
-            chatMessages.scrollTop = chatMessages.scrollHeight; // rolar para o final
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Guarda no histórico
+            conversationHistory.push({ sender, text });
         }
 
-        // Simulação de "IA pensando" com resposta automática depois de um texto
+        // Função para ANALISAR o tema da conversa baseado nas últimas mensagens
+        function detectTheme(userMessage) {
+            const lower = userMessage.toLowerCase();
+            
+            if (lower.includes('valor') || lower.includes('importa') || lower.includes('prioridade')) 
+                return 'valores';
+            if (lower.includes('medo') || lower.includes('receio') || lower.includes('inseguran')) 
+                return 'medos';
+            if (lower.includes('autênt') || lower.includes('verdadeiro') || lower.includes('falso')) 
+                return 'autenticidade';
+            if (lower.includes('força') || lower.includes('talento') || lower.includes('dom')) 
+                return 'forcas';
+            if (lower.includes('fraqueza') || lower.includes('fragilidade') || lower.includes('defeito')) 
+                return 'fragilidades';
+            if (lower.includes('futuro') || lower.includes('5 anos') || lower.includes('daqui a')) 
+                return 'futuro';
+            if (lower.includes('opinião') || lower.includes('os outros') || lower.includes('pensam de mim')) 
+                return 'externa';
+            if (lower.includes('crença') || lower.includes('acredito') || lower.includes('mudar algo em mim')) 
+                return 'crencas';
+            if (lower.includes('propósito') || lower.includes('missão') || lower.includes('sentido')) 
+                return 'proposito';
+            if (lower.includes('relacionamento') || lower.includes('amizade') || lower.includes('amor')) 
+                return 'relacoes';
+            
+            return currentTheme; // mantém o tema anterior se não detectar novo
+        }
+
+        // RESPOSTAS VARIADAS e não repetitivas baseadas no tema e contexto
+        function generateAIResponse(userMessage) {
+            // Detecta o tema atual
+            const newTheme = detectTheme(userMessage);
+            if (newTheme !== currentTheme) {
+                currentTheme = newTheme;
+            }
+            
+            const lowerMsg = userMessage.toLowerCase();
+            const lastAIResponse = conversationHistory.filter(msg => msg.sender === 'ia').pop()?.text || '';
+            
+            // Evita respostas muito repetitivas
+            const respostas = {
+                valores: [
+                    "Que valores estão mais vivos em você no dia a dia?",
+                    "Esses valores vieram de você ou foram herdados?",
+                    "Como você se sente quando vive de acordo com eles?",
+                    "Tem algum valor que você gostaria de desenvolver mais?",
+                    "Você já traiu algum valor importante? Como foi?"
+                ],
+                medos: [
+                    "Esse medo te protege ou te limita?",
+                    "Desde quando você sente esse medo?",
+                    "O que aconteceria se você enfrentasse esse medo?",
+                    "Seu medo diz mais sobre você ou sobre o mundo?",
+                    "Como seria sua vida sem esse medo?"
+                ],
+                autenticidade: [
+                    "O que torna esses momentos tão especiais?",
+                    "Você se sente autêntico com mais frequência sozinho ou acompanhado?",
+                    "Tem algo que você esconde dos outros sobre quem realmente é?",
+                    "A autenticidade exige coragem. Como você cultiva a sua?",
+                    "Quando você age de forma não autêntica, o que está tentando proteger?"
+                ],
+                forcas: [
+                    "Como você descobriu essa força?",
+                    "Essa força já te ajudou em momentos difíceis?",
+                    "Você subestima alguma qualidade sua?",
+                    "Alguém já elogiou algo que você não valoriza em si mesmo?",
+                    "Como você pode usar mais essa força no seu dia?"
+                ],
+                fragilidades: [
+                    "Essa fragilidade te incomoda ou você aprendeu a conviver com ela?",
+                    "Ela atrapalha mais você ou os outros?",
+                    "Se pudesse transformar essa fraqueza em força, como seria?",
+                    "Todo mundo tem fragilidades. A sua te ensinou algo?",
+                    "Você é muito duro consigo mesmo por causa disso?"
+                ],
+                futuro: [
+                    "Esse futuro que você imagina te anima ou te assusta?",
+                    "O que você precisa começar a fazer hoje para chegar lá?",
+                    "Seu futuro ideal reflete quem você é ou quem querem que você seja?",
+                    "Daqui a 5 anos, o que você gostaria de ter aprendido sobre si?",
+                    "O que você espera que ainda esteja igual em você no futuro?"
+                ],
+                externa: [
+                    "Por que a opinião dos outros pesa tanto (ou pesa pouco) para você?",
+                    "Existe alguém cuja opinião realmente importa mais?",
+                    "Você já percebeu que as pessoas te veem diferente de como você se vê?",
+                    "O que você acha que as pessoas não entendem sobre você?",
+                    "Você se descreveria como alguém independente da opinião alheia?"
+                ],
+                crencas: [
+                    "De onde você acha que veio essa crença?",
+                    "Essa crença te ajuda ou te atrapalha?",
+                    "Que evidências você tem de que essa crença é verdadeira?",
+                    "Se um amigo tivesse essa crença, o que você diria a ele?",
+                    "Que nova crença você gostaria de cultivar no lugar dela?"
+                ],
+                proposito: [
+                    "O que dá sentido à sua vida ultimamente?",
+                    "Propósito pode mudar com o tempo. O seu já mudou?",
+                    "Você sente que está vivendo de acordo com seu propósito?",
+                    "Que pequenas coisas te conectam com algo maior?",
+                    "Propósito é descoberto ou construído? O que você acha?"
+                ],
+                relacoes: [
+                    "Como seus relacionamentos te ajudam a se conhecer melhor?",
+                    "Tem alguém que te faz ser mais você mesmo?",
+                    "Você sente que se perde em alguns relacionamentos?",
+                    "Que tipo de amizade você valoriza hoje?",
+                    "O que você aprende sobre si quando está com os outros?"
+                ],
+                // resposta padrão quando não encaixa em nenhum tema
+                padrao: [
+                    "Pode me contar mais sobre isso?",
+                    "Como isso se conecta com quem você sente que é?",
+                    "O que você sente quando pensa sobre isso?",
+                    "Essa reflexão é profunda. O que mais vem à mente?",
+                    "E o que isso revela sobre você?",
+                    "Como você se sente ao compartilhar isso?",
+                    "O que você aprendeu sobre si mesmo até agora?"
+                ]
+            };
+
+            // Escolhe uma resposta aleatória do tema atual, evitando repetir a última resposta da IA
+            let possiveisRespostas = respostas[currentTheme] || respostas.padrao;
+            
+            // Filtra para evitar repetir exatamente a última resposta
+            const respostasFiltradas = possiveisRespostas.filter(r => r !== lastAIResponse);
+            
+            // Se todas forem iguais à última (raro), usa todas mesmo assim
+            const respostasParaEscolher = respostasFiltradas.length > 0 ? respostasFiltradas : possiveisRespostas;
+            
+            // Escolhe aleatória
+            const randomIndex = Math.floor(Math.random() * respostasParaEscolher.length);
+            let resposta = respostasParaEscolher[randomIndex];
+            
+            // Adiciona variação de acordo com palavras-chave específicas para tornar mais personalizado
+            if (lowerMsg.includes('obrigado') || lowerMsg.includes('valeu')) {
+                resposta = "Por nada! Estou aqui para te ajudar a se conhecer melhor. 😊";
+            } else if (lowerMsg.includes('não sei') || lowerMsg.includes('difícil')) {
+                resposta = "Sem pressa. São perguntas profundas mesmo. O que vem à sua mente agora?";
+            } else if (lowerMsg.includes('sim') && lowerMsg.length < 10) {
+                resposta = "Pode elaborar um pouco mais? Quanto mais você compartilha, mais eu posso ajudar.";
+            } else if (lowerMsg.includes('tudo bem') || lowerMsg.includes('como você está')) {
+                resposta = "Estou bem, obrigado! Foco total em você. Como está se sentindo hoje?";
+            }
+            
+            return resposta;
+        }
+
+        // Simula resposta da IA com contexto
         function simulateAIResponse(userMessage) {
-            // Simula uma resposta personalizada baseada em palavras-chave simples (para demonstração)
             setTimeout(() => {
-                let reply = "Refletindo sobre isso... 🤔 conte-me mais.";
-                const lowerMsg = userMessage.toLowerCase();
-
-                if (lowerMsg.includes('valores') || lowerMsg.includes('valorizo')) {
-                    reply = "Valores são a estrutura do autoconceito. Você sente que vive de acordo com os seus?";
-                } else if (lowerMsg.includes('medo') || lowerMsg.includes('medos')) {
-                    reply = "Reconhecer medos é corajoso. Eles te protegem ou te limitam?";
-                } else if (lowerMsg.includes('autêntico') || lowerMsg.includes('autenticidade')) {
-                    reply = "A autenticidade aparece quando não estamos performando. O que estava presente nesses momentos?";
-                } else if (lowerMsg.includes('forças') || lowerMsg.includes('fragilidades')) {
-                    reply = "Forças e fragilidades coexistem. Aceitar ambas é um caminho para um autoconceito integrado.";
-                } else if (lowerMsg.includes('crença') || lowerMsg.includes('mudar uma crença')) {
-                    reply = "Crenças são narrativas. Qual nova história você gostaria de cultivar sobre si?";
-                } else if (lowerMsg.includes('opiniões') || lowerMsg.includes('alheias')) {
-                    reply = "O olhar do outro influencia, mas não define. O que você acha de verdade?";
-                } else {
-                    reply = "Obrigado por compartilhar. Como isso se conecta com quem você sente que é?";
-                }
-
+                const reply = generateAIResponse(userMessage);
                 addMessage(reply, 'ia');
-            }, 600); // atraso para parecer humano
+            }, 1000); // atraso natural
         }
 
         // Quando enviar mensagem (clique ou enter)
@@ -523,7 +648,7 @@
             addMessage(text, 'user');
             userInput.value = '';
 
-            // Simula "digitando" com um indicador (opcional)
+            // Indicador de digitação
             const typingDiv = document.createElement('div');
             typingDiv.classList.add('typing-indicator');
             typingDiv.innerHTML = '<span></span><span></span><span></span>';
@@ -531,7 +656,7 @@
             chatMessages.appendChild(typingDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // Remove indicador e envia resposta após 1.2s
+            // Remove indicador e envia resposta
             setTimeout(() => {
                 const tempTyping = document.getElementById('typingTemp');
                 if (tempTyping) tempTyping.remove();
@@ -552,15 +677,12 @@
             card.addEventListener('click', function() {
                 const question = this.getAttribute('data-question');
                 if (question) {
-                    userInput.value = question;   // coloca a pergunta no campo
-                    handleSendMessage();           // envia automaticamente
+                    userInput.value = question;
+                    handleSendMessage();
                 }
             });
         });
 
-        // Pequeno toque: bem-estar, feedback visual nas mensagens iniciais (já existentes)
-        // Remove a mensagem de exemplo (opcional, mas vou manter como boas-vindas)
-        // (as mensagens estáticas no HTML servem como warm welcome)
     })();
 </script>
 
